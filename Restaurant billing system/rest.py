@@ -1,3 +1,7 @@
+
+
+
+
 import xlrd
 from tkinter import *
 import xlwt
@@ -6,11 +10,14 @@ import xlsxwriter
 from xlwt import Workbook
 root = Tk()
 
+#Title
+root.title("Restaurant Bill Calculator")
 
+#Quit Function
 def closeWin():
     root.destroy()
 
-
+#---------------------WHOLE MENU AND CALCULATION SECTION----------------
 def printtext():
 
     # Workbook is created
@@ -28,19 +35,20 @@ def printtext():
     date_format = xlwt.XFStyle()
     date_format.num_format_str = 'dd/mm/yyyy'
     sheet1.write(1, 2, datetime.datetime.now(), date_format)
-    sheet1.write(10, 2, 'GST @18%')
-    sheet1.write(11, 2, 'GRAND TOTAL')
 
+    #Getting the dishes with , form
     global entry_num
     string = entry_num.get()
     print(string)
 
+    #Converting it into list for seprating them
     L = string.split(',')
     print("\nThe values of input are", L)
     total_price = 0
     nr = 4
     pr = 4
 
+    #MENU
     for i in L:
         if i == 'chkspp':
             price = 762
@@ -95,80 +103,97 @@ def printtext():
         nr = nr + 1
         pr = pr + 1
 
+    #Calculating GST
     total_gst = total_price * (0.18)
     total_price = total_price + total_gst
 
-    sheet1.write(10, 5, total_gst)
-    sheet1.write(11, 5, total_price)
+    sheet1.write(nr, 5, total_gst)
+    sheet1.write(nr+1, 5, total_price)
+    sheet1.write(nr, 2, 'GST @18%')
+    sheet1.write(nr+1, 2, 'GRAND TOTAL')
 
-    # Program to extract a particular row value
-
-    '''loc = ("bill")
-
-    wb = xlrd.open_workbook(loc)
-    sheet = wb.sheet_by_index(1)
-
-    sheet.cell_value(0, 0)
-
-    print(sheet.row_values(1))
-    print(sheet.row_values(2))
-    print(sheet.row_values(3))
-    print(sheet.row_values(4))
-    print(sheet.row_values(5))
-    print(sheet.row_values(6))
-    print(sheet.row_values(7))
-    print(sheet.row_values(8))
-    print(sheet.row_values(9))
-    print(sheet.row_values(10))
-    print(sheet.row_values(11))
-    print(sheet.row_values(12))
-'''
     output.delete(0.0, END)
     output.insert(END, str(total_price))
 
     output_gst.delete(0.0, END)
     output_gst.insert(END, str(total_gst))
-    wb.save('bill.xls')
 
+    #THIS WHOLE SECTION IS USED FOR NAMING THE EXCEL SHEET ACCORDING TO OUR RUN TIME 
+    def get_var_value(filename="varstore.dat"):
+        with open(filename, "a+") as f:
+            f.seek(0)
+            val = int(f.read() or 0) + 1
+            f.seek(0)
+            f.truncate()
+            f.write(str(val))
+            return val
 
+    your_counter = get_var_value()
+    sheet1.write(1, 5, '{}.xls'.format(your_counter))
+    print("This script has been run {} times.".format(your_counter))
+
+    wb.save('{}'.format(your_counter))
+    
+    
+
+#MINIMUM SIZE OF OUTPUT SCREEN
 root.minsize(500, 500)
-no_dishes = Label(root, text="Enter the dishes")
-no_dishes.grid(row=0, column=0)
-
-entry_num = Entry(root, width=40)
-entry_num.grid(row=0, column=2)
-
-button_entry = Button(root, text='SUBMIT', command=printtext)
-button_entry.grid(row=1, column=3)
-
-# output tax, 6
-lab_output_tax = Label(root, text="Total Bill")
-lab_output_tax.grid(row=5, column=0)
-
-output = Text(root, width=42, height=1, wrap=WORD)
-output.grid(row=5, column=1, columnspan=4)
-
-# output taxable, 7
-lab_output_taxable = Label(root, text="Total gst")
-lab_output_taxable.grid(row=6, column=0)
-
-output_gst = Text(root, width=42, height=1, wrap=WORD)
-output_gst.grid(row=6, column=1, columnspan=4)
 
 
-# make sure to define the reset button
+#Title on output window screen
+label_info = Label(root, font=('arial', 25, 'bold'),
+                   text="Restaurant Bill Calculator", fg="steel blue", bd=10, anchor='w')
+label_info.grid(row=0, column=3)
+
+#-------------Section For Taking Input---------
+
+#Making object of stringvar()
+no_dishes_1 = StringVar()
+
+#Input
+no_dishes = Label(root, text="Enter the dishes", font=('arial', 16, 'bold'))
+no_dishes.grid(row=1, column=1)
+entry_num = Entry(root, width=40,  textvariable=no_dishes_1,
+                  font=('arial', 16, 'bold'))
+entry_num.grid(row=1, column=3)
+
+#Input Button 
+button_entry = Button(root, text='SUBMIT',
+                      command=printtext, font=('arial', 16, 'bold'))
+button_entry.grid(row=2, column=4)
+
+#------------Section for Showing Total Bill----------
+
+lab_output_tax = Label(root, text="Total Bill", font=('arial', 16, 'bold'))
+lab_output_tax.grid(row=6, column=1)
+
+#printing total bill 
+output = Text(root, width=42, height=1, wrap=WORD, font=('arial', 16, 'bold'))
+output.grid(row=6, column=2, columnspan=4)
+
+#--------------Section For Showing Gst--------------------
+
+lab_output_taxable = Label(root, text="Total gst", font=('arial', 16, 'bold'))
+lab_output_taxable.grid(row=7, column=1)
+
+#Print Total Gst
+output_gst = Text(root, width=42, height=1, wrap=WORD,
+                  font=('arial', 16, 'bold'))
+output_gst.grid(row=7, column=2, columnspan=4)
+
+
+# define the reset function
 def reset():
-    lab_output_tax = Button(root, text="")
-    lab_output_taxable = Button(root, text="")
-    no_dishes = Button(root, text="")
-    return
+    no_dishes_1.set(' ')
 
+#Reset Button
+ButtonReset = Button(root, text="Reset", command=reset,
+                     font=('arial', 16, 'bold'))
+ButtonReset.grid(row=8, column=2)
 
-ButtonReset = Button(root, text="Reset", command=reset)
-ButtonReset.grid(row=7, column=1)
+#Quit Button
+quit = Button(text="Quit", command=closeWin, font=('arial', 16, 'bold'))
+quit.grid(row=8, column=4)
 
-
-quit = Button(text="Quit", command=closeWin)
-quit.grid(row=7, column=4)
-
+#Looping 
 root.mainloop()

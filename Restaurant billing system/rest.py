@@ -1,7 +1,4 @@
 
-
-
-
 import xlrd
 from tkinter import *
 import xlwt
@@ -129,10 +126,10 @@ def printtext():
             return val
 
     your_counter = get_var_value()
-    sheet1.write(1, 5, '{}.xls'.format(your_counter))
+    sheet1.write(1, 5, '{}'.format(your_counter))
     print("This script has been run {} times.".format(your_counter))
 
-    wb.save('{}'.format(your_counter))
+    wb.save('{}.xlsx'.format(your_counter))
     
     
 
